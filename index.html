@@ -85,6 +85,18 @@
             opacity: 1;
         }
 
+        .card.empty-slot {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .card.empty-slot:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
         .card-back {
             width: 100%;
             height: 100%;
@@ -622,6 +634,9 @@
                     card.style.width = '80px';
                     card.style.height = '120px';
                     
+                    // 在原位置创建空缺
+                    this.createEmptySlot(card);
+                    
                     // 翻转卡片显示正面
                     setTimeout(() => {
                         card.classList.add('flipped');
@@ -645,6 +660,35 @@
                 }, 800);
             }
 
+            createEmptySlot(originalCard) {
+                // 获取原卡片的位置信息
+                const originalIndex = originalCard.dataset.index;
+                const cardRow = document.getElementById('cardRow');
+                
+                // 创建空缺位置元素
+                const emptySlot = document.createElement('div');
+                emptySlot.className = 'card empty-slot';
+                emptySlot.dataset.index = originalIndex;
+                emptySlot.dataset.empty = 'true';
+                
+                // 设置空缺位置的样式
+                emptySlot.style.width = '80px';
+                emptySlot.style.height = '120px';
+                emptySlot.style.borderRadius = '8px';
+                emptySlot.style.display = 'flex';
+                emptySlot.style.alignItems = 'center';
+                emptySlot.style.justifyContent = 'center';
+                emptySlot.style.color = 'rgba(255, 255, 255, 0.5)';
+                emptySlot.style.fontSize = '12px';
+                emptySlot.style.textAlign = 'center';
+                emptySlot.innerHTML = '已选择';
+                
+                // 在原卡片位置插入空缺
+                const originalPosition = Array.from(cardRow.children).indexOf(originalCard);
+                if (originalPosition !== -1) {
+                    cardRow.insertBefore(emptySlot, cardRow.children[originalPosition]);
+                }
+            }
 
             showCardZoom(card) {
                 const zoomOverlay = document.getElementById('cardZoomOverlay');
@@ -675,6 +719,10 @@
             resetGame() {
                 this.selectedCards = [];
                 
+                // 清理所有空缺位置
+                const emptySlots = document.querySelectorAll('.card.empty-slot');
+                emptySlots.forEach(slot => slot.remove());
+                
                 // 重置所有卡片
                 this.cards.forEach(card => {
                     card.classList.remove('selected', 'moving', 'removed', 'flipped');
@@ -703,3 +751,4 @@
     </script>
 </body>
 </html>
+
